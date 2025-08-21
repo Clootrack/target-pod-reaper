@@ -1,0 +1,43 @@
+name: Build and Push to ACR- Pod-Reaper
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_and_push:
+    name: Build and Push Pod-Reaper to ACR
+    environment: "dev_cus"
+    runs-on: ["self-hosted", "dev_cus"]
+    steps:
+      - name: QEMU setup
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set environment variables
+        id: set-env
+        run: |
+          ENV_UPPER=$(echo 'dev_cus' | tr '[:lower:]' '[:upper:]')
+          echo "azure_url=${ENV_UPPER}_AZURE_URL" >> $GITHUB_ENV
+          echo "acr_username=${ENV_UPPER}_ACR_USERNAME" >> $GITHUB_ENV
+          echo "acr_password=${ENV_UPPER}_ACR_PASSWORD" >> $GITHUB_ENV
+          echo "kube_config=${ENV_UPPER}_KUBE_CONFIG" >> $GITHUB_ENV
+
+      - name: Docker Login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets[env.azure_url] }}
+          username: ${{ secrets[env.acr_username] }}
+          password: ${{ secrets[env.acr_password] }}
+
+      - name: Docker Buildx Setup
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Docker Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          platforms: linux/arm64,linux/amd64
+          tags: ${{ secrets[env.azure_url] }}/pod-reaper: ${{ github.sha }},${{ secrets[env.azure_url] }}/pod-reaper:latest
