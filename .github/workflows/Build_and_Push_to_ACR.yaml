@@ -48,4 +48,4 @@ jobs:
         with:
           push: true
           platforms: linux/arm64,linux/amd64
-          tags: ${{ secrets[env.azure_url] }}/pod-reaper/pod-reaper: ${{ github.sha }},${{ secrets[env.azure_url] }}/pod-reaper/pod-reaper:latest
+          tags: ${{ secrets[env.azure_url] }}/pod-reaper/pod-reaper:${{ github.sha }},${{ secrets[env.azure_url] }}/pod-reaper/pod-reaper:latest
