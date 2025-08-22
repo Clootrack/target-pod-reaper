@@ -1,15 +1,23 @@
 name: Build and Push to ACR- Pod-Reaper
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev_cus
+          - qa_cus
+          - prod_cus
+        default: 'dev_cus'
 
 jobs:
   build_and_push:
     name: Build and Push Pod-Reaper to ACR
-    environment: "dev_cus"
-    runs-on: ["self-hosted", "dev_cus"]
+    environment: '${{ github.event.inputs.environment }}'
+    runs-on: ["self-hosted", '${{ github.event.inputs.environment }}']
     steps:
       - name: QEMU setup
         uses: docker/setup-qemu-action@v1
@@ -17,7 +25,7 @@ jobs:
       - name: Set environment variables
         id: set-env
         run: |
-          ENV_UPPER=$(echo 'dev_cus' | tr '[:lower:]' '[:upper:]')
+          ENV_UPPER=$(echo '${{ github.event.inputs.environment }}' | tr '[:lower:]' '[:upper:]')
           echo "azure_url=${ENV_UPPER}_AZURE_URL" >> $GITHUB_ENV
           echo "acr_username=${ENV_UPPER}_ACR_USERNAME" >> $GITHUB_ENV
           echo "acr_password=${ENV_UPPER}_ACR_PASSWORD" >> $GITHUB_ENV
