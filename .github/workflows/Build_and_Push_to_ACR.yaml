@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - dev_cus
+          - dev_poc
           - qa_cus
           - prod_cus
         default: 'dev_cus'
